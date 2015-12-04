@@ -17,7 +17,10 @@
 package ly.stealth.xmlavro;
 
 import org.apache.avro.Schema;
+import org.apache.avro.file.DataFileWriter;
+import org.apache.avro.generic.GenericDatumWriter;
 import org.apache.avro.io.DatumWriter;
+import org.apache.avro.io.Encoder;
 import org.apache.avro.io.EncoderFactory;
 import org.apache.avro.specific.SpecificDatumWriter;
 
@@ -137,7 +140,11 @@ public class Converter {
 
         try (OutputStream stream = new FileOutputStream(opts.avroFile)) {
             DatumWriter<Object> datumWriter = new SpecificDatumWriter<>(schema);
-            datumWriter.write(datum, EncoderFactory.get().directBinaryEncoder(stream, null));
+            DataFileWriter<Object> dataFileWriter = new DataFileWriter<>(datumWriter);
+
+            dataFileWriter.create(schema, stream);
+            dataFileWriter.append(datum);
+            dataFileWriter.flush();
         }
     }
 }
